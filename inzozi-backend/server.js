@@ -40,12 +40,18 @@ import authRouter from './routes/authRoutes.js';
 import projectsRouter from './routes/projectRoutes.js';
 import tasksRouter from './routes/taskRoutes.js';
 import messagesRouter from './routes/messageRoutes.js';
+import delegationRouter from './routes/delegationRoutes.js';
+import { seedRolesAndPermissions } from './config/roles.js';
+
+// Seed Roles and Permissions
+seedRolesAndPermissions();
 
 // Mount routes
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/messages', messagesRouter);
+app.use('/api/delegations', delegationRouter);
 
 // WebSocket Connections
 io.on('connection', (socket) => {

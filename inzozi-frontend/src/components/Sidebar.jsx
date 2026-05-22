@@ -17,44 +17,60 @@ const Sidebar = ({ activePage, setActivePage }) => {
 
   if (!user) return null;
 
-  // Determine which navigation options are available based on user roles
+  // Determine which navigation options are available based on user permissions
   const navItems = [
     { 
       id: 'dashboard', 
       label: 'Global Dashboard', 
       icon: LayoutDashboard,
-      roles: ['admin', 'developer', 'manager', 'content_controller', 'marketer', 'support'] 
+      permissions: [] 
     },
     { 
       id: 'tasks', 
       label: 'Kanban Tasks Hub', 
       icon: Columns4,
-      roles: ['admin', 'developer', 'manager', 'marketer'] 
+      permissions: ['view_tasks', 'manage_tasks'] 
     },
     { 
       id: 'chat', 
       label: 'Messaging Hub', 
       icon: MessageSquare,
-      roles: ['admin', 'developer', 'manager', 'content_controller', 'marketer', 'support'] 
+      permissions: [] 
     },
     { 
       id: 'impressa-admin', 
       label: 'Impressa Control', 
       icon: ShoppingBag,
-      roles: ['admin', 'content_controller', 'support'] 
+      permissions: ['approve_products', 'moderate_content'] 
+    },
+    {
+      id: 'delegations',
+      label: 'Roster & Coverage',
+      icon: ShieldCheck,
+      permissions: ['manage_delegations_hr', 'manage_delegations_admin']
     }
   ];
 
-  // Filter items
-  const visibleItems = navItems.filter(item => item.roles.includes(user.role));
+  // Filter items based on dynamic permissions in JWT
+  const userPermissions = user.permissions || [];
+  const visibleItems = navItems.filter(item => {
+    if (item.permissions.length === 0) return true;
+    return item.permissions.some(p => userPermissions.includes(p));
+  });
 
   const roleColors = {
-    admin: 'bg-red-500/10 text-red-400 border border-red-500/20',
-    developer: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-    manager: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    sysadmin: 'bg-red-500/10 text-red-400 border border-red-500/20',
+    hr_manager: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    product_manager: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
+    ux_designer: 'bg-pink-500/10 text-pink-400 border border-pink-500/20',
+    lead_engineer: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+    software_engineer: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+    qa_engineer: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+    devops: 'bg-red-500/10 text-red-450 border border-red-500/20',
+    security_engineer: 'bg-slate-500/10 text-slate-400 border border-slate-700/20',
     content_controller: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
-    marketer: 'bg-pink-500/10 text-pink-400 border border-pink-500/20',
-    support: 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+    customer_support: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    growth_marketer: 'bg-pink-500/10 text-pink-400 border border-pink-500/20'
   };
 
   return (
@@ -63,9 +79,11 @@ const Sidebar = ({ activePage, setActivePage }) => {
       {/* Top Section: Brand Logo */}
       <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-purple-500/10">
-            IZ
-          </div>
+          <img 
+            src="/inzozi_group_logo.png" 
+            alt="INZOZI Group Logo" 
+            className="w-10 h-10 object-contain"
+          />
           <div>
             <h1 className="text-base font-extrabold text-white leading-none tracking-tight">INZOZI Group</h1>
             <span className="text-[10px] font-semibold text-slate-500 tracking-widest uppercase">Internal MIS</span>

@@ -4,11 +4,15 @@ import {
   getProjectBySlug,
   getPendingImpressaApprovals,
   updateImpressaProductStatus,
-  getImpressaTickets
+  getImpressaTickets,
+  getPublicShowcaseProjects
 } from '../controllers/projectController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+// Get public portfolio showcase details for the landing page
+router.get('/public/showcase', getPublicShowcaseProjects);
 
 // Get list of all projects managed by Inzozi Group
 router.get('/', protect, getProjects);

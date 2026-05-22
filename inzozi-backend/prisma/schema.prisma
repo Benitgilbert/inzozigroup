@@ -10,15 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  admin
-  developer
-  manager
-  content_controller
-  marketer
-  support
-}
-
 enum ProjectStatus {
   planning
   development
@@ -41,12 +32,47 @@ enum TaskPriority {
   critical
 }
 
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  code        String           @unique
+  description String?
+  isTechnical Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  // Relations
+  employees   Employee[]
+  permissions RolePermission[]
+  delegations Delegation[]     @relation("DelegatedRole")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  code        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+
+  // Relations
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  role         Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
 model Employee {
   id            String      @id @default(uuid())
   name          String
   email         String      @unique
   password      String
-  role          Role        @default(developer)
+  roleId        String?
+  role          Role?       @relation(fields: [roleId], references: [id])
   title         String?     // e.g. "Lead React Dev", "UX/UI Designer"
   avatar        String?     // URL or color code
   isActive      Boolean     @default(true)
@@ -58,6 +84,33 @@ model Employee {
   createdTasks  Task[]      @relation("CreatedTasks")
   messages      Message[]
   timeEntries   TimeEntry[]
+  
+  // Delegations
+  delegations   Delegation[] @relation("UserDelegations")
+  authorized    Delegation[] @relation("AuthorizedDelegations")
+}
+
+model Delegation {
+  id             String    @id @default(uuid())
+  startDate      DateTime
+  endDate        DateTime
+  reason         String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  // Relations
+  employeeId     String
+  employee       Employee  @relation("UserDelegations", fields: [employeeId], references: [id], onDelete: Cascade)
+
+  targetRoleId   String
+  targetRole     Role      @relation("DelegatedRole", fields: [targetRoleId], references: [id], onDelete: Cascade)
+
+  authorizerId   String
+  authorizer     Employee  @relation("AuthorizedDelegations", fields: [authorizerId], references: [id])
+
+  @@index([employeeId])
+  @@index([targetRoleId])
+  @@index([authorizerId])
 }
 
 model Project {
